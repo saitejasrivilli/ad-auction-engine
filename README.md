@@ -1,5 +1,9 @@
 # Ad Auction Engine
 
+**Live demo:** https://ad-auction-engine.onrender.com
+
+**GitHub:** https://github.com/saitejasrivilli/ad-auction-engine
+
 A production-grade distributed ad auction service in Go implementing second-price (Vickrey) auctions with eCPM ranking, smooth budget pacing, circuit breaking, and full observability.
 
 **Stack:** Go · gRPC · Redis · Prometheus · Grafana · Docker
