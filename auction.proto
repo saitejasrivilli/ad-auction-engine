@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package auction;
+option go_package = "github.com/saitejasrivilli/ad-auction-engine/proto";
+
+// ── Request / Response ────────────────────────────────────────────────────────
+
+message BidRequest {
+  string  request_id    = 1;  // unique auction ID
+  string  placement_id  = 2;  // ad slot identifier
+  string  user_id       = 3;
+  double  floor_price   = 4;  // minimum acceptable CPM
+  repeated Candidate candidates = 5;
+}
+
+message Candidate {
+  string  ad_id          = 1;
+  string  advertiser_id  = 2;
+  double  bid_cpm        = 3;  // advertiser bid in CPM (cost per mille)
+  double  predicted_ctr  = 4;  // model score [0,1]
+  double  daily_budget   = 5;  // advertiser daily budget USD
+}
+
+message AuctionResult {
+  string  request_id     = 1;
+  string  winner_ad_id   = 2;
+  string  winner_adv_id  = 3;
+  double  clearing_price = 4;  // second price in CPM
+  double  ecpm           = 5;  // winner eCPM = bid × CTR
+  bool    budget_capped  = 6;  // true if winner was budget-throttled
+  bool    floor_enforced = 7;  // true if floor filtered any candidates
+  int32   candidates_in  = 8;  // total candidates received
+  int32   candidates_out = 9;  // candidates passing budget + floor
+  int64   latency_us     = 10; // auction latency in microseconds
+}
+
+message BudgetStatus {
+  string advertiser_id    = 1;
+  double remaining_budget = 2;
+  double spend_rate       = 3; // tokens/sec
+  bool   throttled        = 4;
+}
+
+// ── Service ───────────────────────────────────────────────────────────────────
+
+service AuctionService {
+  // Core auction RPC — called per ad request
+  rpc RunAuction(BidRequest) returns (AuctionResult);
+
+  // Budget query — used by monitoring / dashboards
+  rpc GetBudgetStatus(BudgetStatusRequest) returns (BudgetStatus);
+}
+
+message BudgetStatusRequest {
+  string advertiser_id = 1;
+}
