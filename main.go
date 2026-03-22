@@ -613,7 +613,7 @@ curl https://ad-auction-engine.onrender.com/demo
       s.o+=s.s*s.d;
       if(s.o>0.9||s.o<0.05)s.d*=-1;
       ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(180,220,255,${s.o})`;ctx.fill();
+      ctx.fillStyle='rgba(180,220,255,'+s.o+')';ctx.fill();
     });
     requestAnimationFrame(draw);
   }
@@ -643,7 +643,7 @@ function log(msg,cls=''){
   const ts=new Date().toISOString().substr(11,12);
   const div=document.createElement('div');
   div.className='log-entry'+(cls?' '+cls:'');
-  div.textContent=`[${ts}] ${msg}`;
+  div.textContent='['+ts+'] '+msg;
   el.appendChild(div);
   el.scrollTop=el.scrollHeight;
   // keep max 40 lines
@@ -680,8 +680,8 @@ async function runAuction(animate=true){
   })).map(c=>({...c,ecpm:parseFloat((c.bid*c.ctr).toFixed(4))}));
 
   auctionCount++;
-  document.getElementById('auction-counter').textContent=`auctions: ${auctionCount}`;
-  log(`--- auction #${auctionCount} | floor=${floor} CPM ---`,'highlight');
+  document.getElementById('auction-counter').textContent='auctions: '+auctionCount;
+  log('--- auction #'+auctionCount+' | floor='+floor+' CPM ---','highlight');
 
   // step 0: show all candidates
   if(animate)setPipeStep(0,candidates.length,'active');
@@ -690,13 +690,13 @@ async function runAuction(animate=true){
     const row=document.createElement('div');
     row.className='candidate-row new-entry';
     row.id='row-'+i;
-    row.innerHTML=`
-      <div class="c-name">${c.name}</div>
-      <div class="c-bar-wrap"><div class="c-bar" id="bar-${i}" style="width:0%"></div></div>
-      <div class="c-val c-bid">${fmt2(c.bid)}</div>
-      <div class="c-val c-ctr">${fmt4(c.ctr)}</div>
-      <div class="c-val c-ecpm">${fmt4(c.ecpm)}</div>
-      <div class="c-status" id="st-${i}">—</div>`;
+    row.innerHTML=
+      '<div class="c-name">'+c.name+'</div>'+
+      '<div class="c-bar-wrap"><div class="c-bar" id="bar-'+i+'" style="width:0%"></div></div>'+
+      '<div class="c-val c-bid">'+fmt2(c.bid)+'</div>'+
+      '<div class="c-val c-ctr">'+fmt4(c.ctr)+'</div>'+
+      '<div class="c-val c-ecpm">'+fmt4(c.ecpm)+'</div>'+
+      '<div class="c-status" id="st-'+i+'">—</div>';
     grid.appendChild(row);
   });
 
@@ -711,7 +711,7 @@ async function runAuction(animate=true){
       document.getElementById('st-'+i).textContent='THROTTLED';
       document.getElementById('st-'+i).className='c-status throttled';
       document.getElementById('row-'+i).classList.add('eliminated');
-      log(`  ${c.name}: budget throttled`);
+      log('  '+c.name+': budget throttled');
     } else {
       budgetPassed.push({...c,idx:i});
     }
@@ -727,7 +727,7 @@ async function runAuction(animate=true){
       document.getElementById('st-'+c.idx).textContent='<FLOOR';
       document.getElementById('st-'+c.idx).className='c-status floor';
       document.getElementById('row-'+c.idx).classList.add('eliminated');
-      log(`  ${c.name}: bid ${c.bid} < floor ${floor}`);
+      log('  '+c.name+': bid '+c.bid+' < floor '+floor);
     } else {
       floorPassed.push(c);
     }
@@ -771,20 +771,21 @@ async function runAuction(animate=true){
   document.getElementById('st-'+winner.idx).textContent='WINNER';
   document.getElementById('st-'+winner.idx).style.color='var(--gold)';
 
-  log(`  winner: ${winner.name} | eCPM=${fmt4(winner.ecpm)} | clearing=${fmt2(clearingPrice)} CPM`,'win');
+  log('  winner: '+winner.name+' | eCPM='+fmt4(winner.ecpm)+' | clearing='+fmt2(clearingPrice)+' CPM','win');
 
   // result panel
   resultPanel.className='result-panel has-result';
-  resultPanel.innerHTML=`<div class="result-row">
-    <div class="result-field"><div class="result-key">winner</div><div class="result-val gold">${winner.name}</div></div>
-    <div class="result-field"><div class="result-key">eCPM</div><div class="result-val gold">${fmt4(winner.ecpm)}</div></div>
-    <div class="result-field"><div class="result-key">clearing price</div><div class="result-val">${fmt2(clearingPrice)} CPM</div></div>
-    <div class="result-field"><div class="result-key">bid</div><div class="result-val">${fmt2(winner.bid)}</div></div>
-    <div class="result-field"><div class="result-key">predicted CTR</div><div class="result-val">${fmt4(winner.ctr)}</div></div>
-    <div class="result-field"><div class="result-key">floor</div><div class="result-val">${fmt2(floor)} CPM</div></div>
-    <div class="result-field"><div class="result-key">candidates in</div><div class="result-val green">${candidates.length}</div></div>
-    <div class="result-field"><div class="result-key">after filters</div><div class="result-val green">${floorPassed.length}</div></div>
-  </div>`;
+  resultPanel.innerHTML=
+    '<div class="result-row">'+
+    '<div class="result-field"><div class="result-key">winner</div><div class="result-val gold">'+winner.name+'</div></div>'+
+    '<div class="result-field"><div class="result-key">eCPM</div><div class="result-val gold">'+fmt4(winner.ecpm)+'</div></div>'+
+    '<div class="result-field"><div class="result-key">clearing price</div><div class="result-val">'+fmt2(clearingPrice)+' CPM</div></div>'+
+    '<div class="result-field"><div class="result-key">bid</div><div class="result-val">'+fmt2(winner.bid)+'</div></div>'+
+    '<div class="result-field"><div class="result-key">predicted CTR</div><div class="result-val">'+fmt4(winner.ctr)+'</div></div>'+
+    '<div class="result-field"><div class="result-key">floor</div><div class="result-val">'+fmt2(floor)+' CPM</div></div>'+
+    '<div class="result-field"><div class="result-key">candidates in</div><div class="result-val green">'+candidates.length+'</div></div>'+
+    '<div class="result-field"><div class="result-key">after filters</div><div class="result-val green">'+floorPassed.length+'</div></div>'+
+    '</div>';
 
   running=false;
 }
